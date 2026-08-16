@@ -15,10 +15,3 @@ data class StreamResult(
     val mimeType: String? = null,
     val durationMs: Long? = null
 )
-
-class ProviderRegistry {
-    private val providers = mutableListOf<MusicProvider>()
-    fun register(provider: MusicProvider) { if (providers.none { it.info.id == provider.info.id }) providers += provider }
-    fun all(): List<MusicProvider> = providers.toList()
-    fun find(id: String): MusicProvider? = providers.firstOrNull { it.info.id == id }
-}
