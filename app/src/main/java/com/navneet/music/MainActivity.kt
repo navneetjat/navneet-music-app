@@ -92,15 +92,18 @@ fun NavneetMusicApp() {
     var playing by remember { mutableStateOf(false) }
     var tab by remember { mutableStateOf(0) }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(playback) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) { playing = isPlaying }
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 current = songs.firstOrNull { it.id == mediaItem?.mediaId }
             }
         }
-        playback.player.addListener(listener)
-        onDispose { playback.player.removeListener(listener); playback.release() }
+        playback.addListener(listener)
+        onDispose {
+            playback.removeListener(listener)
+            playback.release()
+        }
     }
 
     LaunchedEffect(Unit) { launcher.launch(permission) }
@@ -114,7 +117,7 @@ fun NavneetMusicApp() {
                 containerColor = Background,
                 bottomBar = {
                     Column(modifier = Modifier.navigationBarsPadding()) {
-                        current?.let { MiniPlayer(it, playing) { if (playing) playback.player.pause() else playback.player.play() } }
+                        current?.let { MiniPlayer(it, playing) { if (playing) playback.pause() else playback.resume() } }
                         NavigationBar(containerColor = Color(0xFF102D39)) {
                             val labels = listOf("Home", "Search", "Library", "Extensions", "Settings")
                             val icons = listOf(Icons.Default.Home, Icons.Default.Search, Icons.Default.LibraryMusic, Icons.Default.Extension, Icons.Default.Settings)
@@ -193,7 +196,7 @@ fun NavneetMusicApp() {
     Column(Modifier.fillMaxSize()) {
         Header("Settings")
         SettingGroup("Appearance", listOf("Dark theme" to "Always on in the initial build"))
-        SettingGroup("Playback", listOf("Media3 / ExoPlayer" to "Local and provider streams use one playback pipeline", "Background playback" to "Prepared for MediaSession integration"))
+        SettingGroup("Playback", listOf("Media3 / ExoPlayer" to "Local and provider streams use one playback pipeline", "Background playback" to "MediaSessionService enabled"))
         SettingGroup("Data", listOf("Search history" to "Coming with persistent storage", "Cache" to "Coming in the data layer"))
         SettingGroup("About", listOf("Version" to "0.1.0", "Architecture" to "Kotlin + Compose + Media3 + provider extensions"))
     }
